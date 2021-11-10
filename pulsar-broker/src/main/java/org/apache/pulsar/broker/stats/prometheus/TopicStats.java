@@ -20,6 +20,7 @@ package org.apache.pulsar.broker.stats.prometheus;
 
 import static org.apache.pulsar.common.naming.TopicName.PARTITIONED_TOPIC_SUFFIX;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Optional;
 import org.apache.bookkeeper.mledger.util.StatsBuckets;
@@ -54,7 +55,7 @@ class TopicStats {
     Map<String, AggregatedProducerStats> producerStats = new HashMap<>();
 
     // Used for tracking duplicate TYPE definitions
-    static Map<String, String> metricWithTypeDefinition = new HashMap<>();
+    static LinkedList<String> metricWithTypeDefinition = new LinkedList<>();
 
     // For compaction
     long compactionRemovedEventCount;
@@ -367,10 +368,10 @@ class TopicStats {
 
     static void metricType(SimpleTextOutputStream stream, String name) {
 
-        if (!metricWithTypeDefinition.containsKey(name)) {
-            metricWithTypeDefinition.put(name, "gauge");
+       if (!metricWithTypeDefinition.peekLast().equals(name)){
+            metricWithTypeDefinition.addLast(name);
             stream.write("# TYPE ").write(name).write(" gauge\n");
-        }
+       }
 
     }
 
